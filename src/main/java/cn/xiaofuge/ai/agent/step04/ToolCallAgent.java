@@ -34,7 +34,7 @@ public interface ToolCallAgent extends Agent {
 
             Map<String, Object> schema = Json.obj();
             schema.put("type", "function");
-            schema.put("function", "fn");
+            schema.put("function", fn);
 
             return schema;
         }

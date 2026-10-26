@@ -68,9 +68,7 @@ public final class OpenAiChatModel implements ChatModel {
         // 1. 组装请求体，model + messages + tools
         LinkedHashMap<Object, Object> body = new LinkedHashMap<>();
         body.put("model", model);
-        body.put("messages", messages.stream()
-                .map(m -> Map.of("role", m.role(), "content", m.content()))
-                .toList());
+        body.put("messages", messages.stream().map(OpenAiChatModel::toWire));
         if (tools != null && !tools.isEmpty()) {
             body.put("tools", tools);
         }
@@ -115,6 +113,34 @@ public final class OpenAiChatModel implements ChatModel {
             throw new RuntimeException(e);
         }
 
+    }
+
+    private static Map<String, Object> toWire(Message m) {
+
+        Map<String, Object> wire = Json.obj();
+        wire.put("role", m.role());
+
+        if (m.toolCalls() != null && !m.toolCalls().isEmpty()) {
+            wire.put("tool_calls", m.toolCalls().stream().map(tc -> {
+                Map<String, Object> fn = Json.obj();
+                fn.put("name", tc.name());
+                fn.put("arguments", tc.argumentsJson());
+
+                Map<String, Object> call = Json.obj();
+                call.put("id", tc.id());
+                call.put("type", "function");
+                call.put("function", fn);
+
+                return call;
+            }));
+        } else {
+            wire.put("content", m.content() == null ? "" : m.content());
+            if ("tool".equals(m.role())) {
+                wire.put("tool_call_id", m.toolCallId());
+            }
+        }
+
+        return wire;
     }
 
 }
