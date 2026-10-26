@@ -68,7 +68,7 @@ public final class OpenAiChatModel implements ChatModel {
         // 1. 组装请求体，model + messages + tools
         LinkedHashMap<Object, Object> body = new LinkedHashMap<>();
         body.put("model", model);
-        body.put("messages", messages.stream().map(OpenAiChatModel::toWire));
+        body.put("messages", messages.stream().map(OpenAiChatModel::toWire).toList());
         if (tools != null && !tools.isEmpty()) {
             body.put("tools", tools);
         }
@@ -90,7 +90,7 @@ public final class OpenAiChatModel implements ChatModel {
 
             // 解析响应体
             Object root = Json.parse(response.body());
-            Object message = ((Map<?, ?>) ((List<?>) ((Map<?, ?>) root).get("choices")).get(0)).get("messages");
+            Object message = ((Map<?, ?>) ((List<?>) ((Map<?, ?>) root).get("choices")).get(0)).get("message");
 
             Object contentObj = ((Map<?, ?>) message).get("content");
             String content = contentObj == null ? "" : String.valueOf(contentObj);
@@ -112,7 +112,7 @@ public final class OpenAiChatModel implements ChatModel {
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
         }
-
+        // github.com/fuzhengwei/ToyAgent-Study
     }
 
     private static Map<String, Object> toWire(Message m) {
@@ -132,9 +132,14 @@ public final class OpenAiChatModel implements ChatModel {
                 call.put("function", fn);
 
                 return call;
-            }));
+            }).toList());
+
+            if (m.content() != null && !m.content().isBlank()) {
+                wire.put("content", m.content());
+            }
         } else {
             wire.put("content", m.content() == null ? "" : m.content());
+
             if ("tool".equals(m.role())) {
                 wire.put("tool_call_id", m.toolCallId());
             }
