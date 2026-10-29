@@ -9,7 +9,7 @@ import cn.xiaofuge.ai.llm.OpenAiChatModel;
 import java.util.*;
 
 /**
- *
+ * <a href="https://docs.spring.io/spring-ai/reference/api/vectordbs/redis.html">spring rag</a>
  * @author xiaofuge bugstack.cn @小傅哥
  * 2026/10/29 23:44
  */
