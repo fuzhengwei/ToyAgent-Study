@@ -39,7 +39,7 @@ public interface RagAgent extends Agent {
 
         @Override
         public String name() {
-            return "";
+            return "Step07";
         }
 
         @Override
